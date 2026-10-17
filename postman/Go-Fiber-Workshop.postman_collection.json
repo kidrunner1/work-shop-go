@@ -1,0 +1,1723 @@
+{
+  "info": {
+    "name": "Go Fiber Workshop - ข้อ 5.0 ถึง 6",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "คู่มือเริ่มต้น: รัน go run . ใน C:\\src\\workshop-go แล้ว Import ไฟล์นี้เข้า Postman\n\nเลือก request แล้ว Send หรือใช้ Run collection เพื่อทดสอบทั้ง 33 กรณี\n\nBasic Auth ตั้งไว้ที่ Collection ทุก request ปกติจะรับค่าจากที่นี่ กรณี Auth ผิดจะ override เฉพาะ request นั้น\n\nตัวแปร base_url = http://localhost:3000, nickname = joe (ไม่ใส่ /)\n\nข้อ 6 ตรวจข้อมูลด้วย validator เท่านั้น ยังไม่บันทึกสมาชิกลงฐานข้อมูล\n\nกรณี 400/401 ที่ตั้งใจทดสอบต้องแสดง PASS เมื่อได้สถานะตรงตามที่กำหนด"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basic_user}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{basic_pass}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "URL ของ server ไม่ใส่ / ท้าย URL"
+    },
+    {
+      "key": "nickname",
+      "value": "joe",
+      "type": "string",
+      "description": "ให้ตรงกับชื่อ route ใน routes/routes.go ไม่ใส่ /"
+    },
+    {
+      "key": "basic_user",
+      "value": "gofiber",
+      "type": "string"
+    },
+    {
+      "key": "basic_pass",
+      "value": "21022566",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "5.1 Factorial - รับ Path",
+      "item": [
+        {
+          "name": "Factorial 5 (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "5"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"number\":5,\"factorial\":120});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial 0 (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "0"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"number\":0,\"factorial\":1});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial 20 (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "20"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"number\":20,\"factorial\":2432902008176640000});",
+                  "});",
+                  "",
+                  "pm.test(\"20! มีค่าตรงกันทุกหลัก\", function () {",
+                  "  pm.expect(pm.response.text()).to.match(/\"factorial\"\\s*:\\s*2432902008176640000(?=\\s*[,}])/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial -1 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/-1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "-1"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาใส่จำนวนเต็มตั้งแต่ 0 ถึง 20\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial 21 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/21",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "21"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาใส่จำนวนเต็มตั้งแต่ 0 ถึง 20\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial abc (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "abc"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาใส่จำนวนเต็มตั้งแต่ 0 ถึง 20\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial 1.5 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/1.5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "1.5"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาใส่จำนวนเต็มตั้งแต่ 0 ถึง 20\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5.2 ASCII - รับ Query",
+      "item": [
+        {
+          "name": "ASCII - Hello (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=Hello",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "Hello"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"tax_id\":\"Hello\",\"ascii\":\"72 101 108 108 111\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ตัวอักษรและตัวเลข (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=A12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "A12"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"tax_id\":\"A12\",\"ascii\":\"65 49 50\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ไม่ส่ง query (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาระบุ tax_id\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ค่าว่าง (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"กรุณาระบุ tax_id\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ภาษาไทย (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=%E0%B8%81",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "ก"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"tax_id ต้องเป็นอักขระ ASCII เช่น ตัวอักษรภาษาอังกฤษหรือตัวเลข\"});",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6 Register - รับ JSON และ validator",
+      "item": [
+        {
+          "name": "Register - ข้อมูลถูกต้อง (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 200\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ข้อมูลสมัครสมาชิกถูกต้อง\",\"data\":{\"username\":\"student01\",\"email\":\"student@example.com\"}});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - ไม่ส่งฟิลด์ (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - JSON ไม่สมบูรณ์ (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - ชนิดข้อมูลผิด (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": 123,\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - username สั้นเกินไป (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ab\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - username ยาวเกินไป (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"aaaaaaaaaaaaaaaaaaaaa\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - username มีสัญลักษณ์ (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student!\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - email ผิดรูปแบบ (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"abc\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - password สั้นเกินไป (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"short\",\n  \"confirm_password\": \"short\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - password ยาวเกินไป (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"confirm_password\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - รหัสผ่านไม่ตรงกัน (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"different\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - ไม่ส่ง confirm_password (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 400\n\nใช้ Basic Auth จาก Collection โดยอัตโนมัติ ดูผลตรวจสอบใน Test Results หลัง Send",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// ตรวจ JSON ที่ตอบกลับ",
+                  "pm.test(\"ข้อมูลตอบกลับถูกต้อง\", function () {",
+                  "  pm.expect(pm.response.json()).to.deep.equal({\"message\":\"ใส่ข้อมูลผิดพลาด\"});",
+                  "});",
+                  "",
+                  "pm.test(\"ไม่ส่งรหัสผ่านกลับ\", function () {",
+                  "  pm.expect(pm.response.text()).not.to.include(\"password\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5.0 Basic Auth - ทดสอบการปฏิเสธ",
+      "item": [
+        {
+          "name": "Factorial - ไม่ส่ง Auth (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "5"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial - รหัสผ่านผิด (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "5"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basic_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "wrong",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Factorial - ชื่อผู้ใช้ผิด (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/fact/5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fact",
+                "5"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "other",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basic_pass}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ไม่ส่ง Auth (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=Hello",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "Hello"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - รหัสผ่านผิด (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=Hello",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "Hello"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basic_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "wrong",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ASCII - ชื่อผู้ใช้ผิด (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v3/{{nickname}}?tax_id=Hello",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v3",
+                "{{nickname}}"
+              ],
+              "query": [
+                {
+                  "key": "tax_id",
+                  "value": "Hello"
+                }
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "other",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basic_pass}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - ไม่ส่ง Auth (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - รหัสผ่านผิด (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basic_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "wrong",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Register - ชื่อผู้ใช้ผิด (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "register"
+              ]
+            },
+            "description": "ผลที่ควรได้: HTTP 401\n\nทดสอบว่า Basic Auth ปฏิเสธคำขอ ก่อนเข้า controller",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "other",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basic_pass}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ตรวจว่า API คืน HTTP status ตามที่คาดไว้",
+                  "pm.test(\"HTTP status ต้องเป็น 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

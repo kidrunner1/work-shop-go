@@ -1,0 +1,12 @@
+# ไฟล์ชั่วคราวและผลลัพธ์จากการ build/test
+/tmp/
+*.exe
+*.test
+coverage.out
+
+# การตั้งค่าเฉพาะเครื่อง
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

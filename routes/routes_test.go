@@ -1,0 +1,106 @@
+package routes_test
+
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"workshop-go/routes"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+func TestBasicAuth(t *testing.T) {
+	app := fiber.New()
+	routes.Setup(app)
+
+	for _, endpoint := range []struct{ method, path string }{
+		{"GET", "/api/v1/fact/5"},
+		{"GET", "/api/v3/joe?tax_id=Hello"},
+		{"POST", "/api/v1/register"},
+	} {
+		for _, auth := range []string{"missing", "wrong password", "wrong username"} {
+			t.Run(endpoint.path+"/"+auth, func(t *testing.T) {
+				req := httptest.NewRequest(endpoint.method, endpoint.path, nil)
+				if auth == "wrong password" {
+					req.SetBasicAuth("gofiber", "wrong")
+				} else if auth == "wrong username" {
+					req.SetBasicAuth("other", "21022566")
+				}
+				res, err := app.Test(req)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer res.Body.Close()
+				if res.StatusCode != http.StatusUnauthorized {
+					t.Fatalf("status = %d, want 401", res.StatusCode)
+				}
+			})
+		}
+	}
+}
+
+func TestAPI(t *testing.T) {
+	app := fiber.New()
+	routes.Setup(app)
+
+	valid := `{"username":"student01","email":"student@example.com","password":"password123","confirm_password":"password123"}`
+	tests := []struct {
+		name, method, path, body string
+		status                   int
+		want                     string
+	}{
+		{"factorial 5", "GET", "/api/v1/fact/5", "", 200, `"factorial":120`},
+		{"factorial 0", "GET", "/api/v1/fact/0", "", 200, `"factorial":1`},
+		{"factorial 20", "GET", "/api/v1/fact/20", "", 200, `"factorial":2432902008176640000`},
+		{"negative", "GET", "/api/v1/fact/-1", "", 400, ""},
+		{"overflow", "GET", "/api/v1/fact/21", "", 400, ""},
+		{"decimal", "GET", "/api/v1/fact/1.5", "", 400, ""},
+		{"not a number", "GET", "/api/v1/fact/abc", "", 400, ""},
+		{"ascii letters", "GET", "/api/v3/joe?tax_id=Hello", "", 200, `"ascii":"72 101 108 108 111"`},
+		{"ascii mixed", "GET", "/api/v3/joe?tax_id=A12", "", 200, `"ascii":"65 49 50"`},
+		{"missing query", "GET", "/api/v3/joe", "", 400, ""},
+		{"empty query", "GET", "/api/v3/joe?tax_id=", "", 400, ""},
+		{"non ascii", "GET", "/api/v3/joe?tax_id=%E0%B8%81", "", 400, ""},
+		{"valid registration", "POST", "/api/v1/register", valid, 200, "ข้อมูลสมัครสมาชิกถูกต้อง"},
+		{"missing fields", "POST", "/api/v1/register", `{}`, 400, "ใส่ข้อมูลผิดพลาด"},
+		{"malformed json", "POST", "/api/v1/register", `{"username":`, 400, "ใส่ข้อมูลผิดพลาด"},
+		{"wrong field type", "POST", "/api/v1/register", `{"username":123}`, 400, "ใส่ข้อมูลผิดพลาด"},
+		{"short username", "POST", "/api/v1/register", strings.Replace(valid, "student01", "ab", 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"long username", "POST", "/api/v1/register", strings.Replace(valid, "student01", strings.Repeat("a", 21), 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"username symbols", "POST", "/api/v1/register", strings.Replace(valid, "student01", "student!", 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"invalid email", "POST", "/api/v1/register", strings.Replace(valid, "student@example.com", "bad-email", 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"short password", "POST", "/api/v1/register", strings.ReplaceAll(valid, "password123", "short"), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"long password", "POST", "/api/v1/register", strings.ReplaceAll(valid, "password123", strings.Repeat("a", 73)), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"password mismatch", "POST", "/api/v1/register", strings.Replace(valid, `"confirm_password":"password123"`, `"confirm_password":"different"`, 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"missing confirmation", "POST", "/api/v1/register", strings.Replace(valid, `,"confirm_password":"password123"`, "", 1), 400, "ใส่ข้อมูลผิดพลาด"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.path, strings.NewReader(tt.body))
+			req.SetBasicAuth("gofiber", "21022566")
+			req.Header.Set("Content-Type", "application/json")
+			res, err := app.Test(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer res.Body.Close()
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if res.StatusCode != tt.status || !strings.Contains(string(body), tt.want) {
+				t.Fatalf("status = %d, body = %s; want status %d containing %q", res.StatusCode, body, tt.status, tt.want)
+			}
+			if !json.Valid(body) {
+				t.Fatalf("response is not JSON: %s", body)
+			}
+			if tt.path == "/api/v1/register" && strings.Contains(string(body), "password") {
+				t.Fatal("response must not contain a password")
+			}
+		})
+	}
+}
