@@ -33,7 +33,7 @@ go run .
 
 ## ข้อ 5.0 Basic Auth
 
-ทุก API รวมทั้งสมัครสมาชิก ต้องตั้งค่าใน Postman ที่แท็บ Authorization:
+ทุก API รวมทั้งสมัครสมาชิก ต้องส่ง Basic Auth:
 
 - Type: Basic Auth
 - Username: `gofiber`
@@ -84,7 +84,7 @@ import c "workshop-go/controller"
 | password | จำเป็น, 8–72 ตัวอักษร |
 | confirm_password | จำเป็น, ตรงกับ password |
 
-ใน Postman เลือก `POST http://localhost:3000/api/v1/register` ตั้ง Basic Auth ตามด้านบน แล้วไปที่ Body → raw → JSON ใส่:
+ส่ง `POST http://localhost:3000/api/v1/register` พร้อม Basic Auth ตามด้านบน ตั้ง `Content-Type: application/json` และส่ง body ดังนี้:
 
 ```json
 {
@@ -124,11 +124,3 @@ import c "workshop-go/controller"
 ใช้กฎสำเร็จรูปของ validator ตามโจทย์ จึงไม่ต้องเขียน regexp เองสำหรับกฎเหล่านี้
 
 เอกสารอ้างอิง: [go-playground/validator](https://github.com/go-playground/validator)
-
-## คู่มือ PDF และ Postman Collection
-
-- [คู่มือภาษาไทย: วิธีใช้งาน หลักการทำงาน และการทดสอบ](output/pdf/go-fiber-workshop-guide-th.pdf)
-- [Postman Collection พร้อมทดสอบ 33 request](postman/Go-Fiber-Workshop.postman_collection.json)
-- [วิธีนำเข้าและใช้งาน Collection](postman/README.md)
-
-รัน `go run .` แล้ว Import Collection เข้า Postman ได้เลย มี Basic Auth ตั้งไว้ให้แล้ว
