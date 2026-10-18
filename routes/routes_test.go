@@ -7,18 +7,19 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"workshop-go/controller"
 	"workshop-go/routes"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func TestBasicAuth(t *testing.T) {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
 	routes.Setup(app)
 
 	for _, endpoint := range []struct{ method, path string }{
 		{"GET", "/api/v1/fact/5"},
-		{"GET", "/api/v3/joe?tax_id=Hello"},
+		{"GET", "/api/v3/krit?tax_id=Hello"},
 		{"POST", "/api/v1/register"},
 	} {
 		for _, auth := range []string{"missing", "wrong password", "wrong username"} {
@@ -37,13 +38,70 @@ func TestBasicAuth(t *testing.T) {
 				if res.StatusCode != http.StatusUnauthorized {
 					t.Fatalf("status = %d, want 401", res.StatusCode)
 				}
+				var body map[string]string
+				if err := json.NewDecoder(res.Body).Decode(&body); err != nil || body["message"] == "" {
+					t.Fatal("401 must return a JSON error message")
+				}
 			})
 		}
 	}
 }
 
+func TestServerErrors(t *testing.T) {
+	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
+	routes.Setup(app)
+	// เส้นทางจำลองมีเฉพาะในชุดทดสอบ ไม่เปิดให้เรียกใน server จริง
+	app.Get("/test/error", func(ctx *fiber.Ctx) error {
+		return io.ErrUnexpectedEOF
+	})
+	app.Get("/test/panic", func(ctx *fiber.Ctx) error {
+		panic("private internal details")
+	})
+
+	for _, path := range []string{"/test/error", "/test/panic"} {
+		t.Run(path, func(t *testing.T) {
+			req := httptest.NewRequest("GET", path, nil)
+			req.SetBasicAuth("gofiber", "21022566")
+			res, err := app.Test(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer res.Body.Close()
+			var body map[string]string
+			if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+				t.Fatal(err)
+			}
+			if res.StatusCode != 500 || body["message"] != "เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่อีกครั้ง" {
+				t.Fatalf("unexpected response: %d %v", res.StatusCode, body)
+			}
+		})
+	}
+}
+
+func TestRegistrationFieldMessage(t *testing.T) {
+	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
+	routes.Setup(app)
+	req := httptest.NewRequest("POST", "/api/v1/register", strings.NewReader(`{"username":"student01","email":"bad-email","password":"password123","confirm_password":"other"}`))
+	req.SetBasicAuth("gofiber", "21022566")
+	req.Header.Set("Content-Type", "application/json")
+	res, err := app.Test(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	var body struct {
+		Errors map[string]string `json:"errors"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+		t.Fatal(err)
+	}
+	if res.StatusCode != 400 || body.Errors["email"] == "" || body.Errors["confirm_password"] == "" || len(body.Errors) != 2 {
+		t.Fatalf("expected email and confirmation errors, got %d %v", res.StatusCode, body.Errors)
+	}
+}
+
 func TestAPI(t *testing.T) {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
 	routes.Setup(app)
 
 	valid := `{"username":"student01","email":"student@example.com","password":"password123","confirm_password":"password123"}`
@@ -59,11 +117,11 @@ func TestAPI(t *testing.T) {
 		{"overflow", "GET", "/api/v1/fact/21", "", 400, ""},
 		{"decimal", "GET", "/api/v1/fact/1.5", "", 400, ""},
 		{"not a number", "GET", "/api/v1/fact/abc", "", 400, ""},
-		{"ascii letters", "GET", "/api/v3/joe?tax_id=Hello", "", 200, `"ascii":"72 101 108 108 111"`},
-		{"ascii mixed", "GET", "/api/v3/joe?tax_id=A12", "", 200, `"ascii":"65 49 50"`},
-		{"missing query", "GET", "/api/v3/joe", "", 400, ""},
-		{"empty query", "GET", "/api/v3/joe?tax_id=", "", 400, ""},
-		{"non ascii", "GET", "/api/v3/joe?tax_id=%E0%B8%81", "", 400, ""},
+		{"ascii letters", "GET", "/api/v3/krit?tax_id=Hello", "", 200, `"ascii":"72 101 108 108 111"`},
+		{"ascii mixed", "GET", "/api/v3/krit?tax_id=A12", "", 200, `"ascii":"65 49 50"`},
+		{"missing query", "GET", "/api/v3/krit", "", 400, ""},
+		{"empty query", "GET", "/api/v3/krit?tax_id=", "", 400, ""},
+		{"non ascii", "GET", "/api/v3/krit?tax_id=%E0%B8%81", "", 400, ""},
 		{"valid registration", "POST", "/api/v1/register", valid, 200, "ข้อมูลสมัครสมาชิกถูกต้อง"},
 		{"missing fields", "POST", "/api/v1/register", `{}`, 400, "ใส่ข้อมูลผิดพลาด"},
 		{"malformed json", "POST", "/api/v1/register", `{"username":`, 400, "ใส่ข้อมูลผิดพลาด"},
@@ -98,7 +156,7 @@ func TestAPI(t *testing.T) {
 			if !json.Valid(body) {
 				t.Fatalf("response is not JSON: %s", body)
 			}
-			if tt.path == "/api/v1/register" && strings.Contains(string(body), "password") {
+			if tt.path == "/api/v1/register" && (strings.Contains(string(body), "password123") || strings.Contains(string(body), "different")) {
 				t.Fatal("response must not contain a password")
 			}
 		})

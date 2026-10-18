@@ -9,7 +9,12 @@ import (
 func Factorial(ctx *fiber.Ctx) error {
 	// แปลงข้อความจาก path เป็นจำนวนเต็ม
 	number, err := strconv.Atoi(ctx.Params("number"))
-	if err != nil || number < 0 || number > 20 {
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "number ต้องเป็นจำนวนเต็ม เช่น 0, 5 หรือ 20",
+		})
+	}
+	if number < 0 || number > 20 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "กรุณาใส่จำนวนเต็มตั้งแต่ 0 ถึง 20",
 		})

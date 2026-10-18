@@ -11,7 +11,7 @@ func TestParams(ctx *fiber.Ctx) error {
 	taxID := ctx.Query("tax_id")
 	if taxID == "" {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "กรุณาระบุ tax_id",
+			"message": "กรุณาระบุ tax_id ใน query เช่น ?tax_id=Hello",
 		})
 	}
 
