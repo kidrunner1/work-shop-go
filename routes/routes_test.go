@@ -81,7 +81,7 @@ func TestServerErrors(t *testing.T) {
 func TestRegistrationFieldMessage(t *testing.T) {
 	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
 	routes.Setup(app)
-	req := httptest.NewRequest("POST", "/api/v1/register", strings.NewReader(`{"username":"student01","email":"bad-email","password":"password123","confirm_password":"other"}`))
+	req := httptest.NewRequest("POST", "/api/v1/register", strings.NewReader(`{"username":"student01","email":"bad-email","password":"password123","confirm_password":"other","phone":"0812345678","business_type":"ร้านค้าออนไลน์","website_name":"student-shop"}`))
 	req.SetBasicAuth("gofiber", "21022566")
 	req.Header.Set("Content-Type", "application/json")
 	res, err := app.Test(req)
@@ -104,7 +104,7 @@ func TestAPI(t *testing.T) {
 	app := fiber.New(fiber.Config{ErrorHandler: controller.ErrorHandler})
 	routes.Setup(app)
 
-	valid := `{"username":"student01","email":"student@example.com","password":"password123","confirm_password":"password123"}`
+	valid := `{"username":"student01","email":"student@example.com","password":"password123","confirm_password":"password123","phone":"0812345678","business_type":"ร้านค้าออนไลน์","website_name":"student-shop"}`
 	tests := []struct {
 		name, method, path, body string
 		status                   int
@@ -134,6 +134,24 @@ func TestAPI(t *testing.T) {
 		{"long password", "POST", "/api/v1/register", strings.ReplaceAll(valid, "password123", strings.Repeat("a", 73)), 400, "ใส่ข้อมูลผิดพลาด"},
 		{"password mismatch", "POST", "/api/v1/register", strings.Replace(valid, `"confirm_password":"password123"`, `"confirm_password":"different"`, 1), 400, "ใส่ข้อมูลผิดพลาด"},
 		{"missing confirmation", "POST", "/api/v1/register", strings.Replace(valid, `,"confirm_password":"password123"`, "", 1), 400, "ใส่ข้อมูลผิดพลาด"},
+		{"optional line id", "POST", "/api/v1/register", strings.Replace(valid, `"phone":`, `"line_id":"student_line","phone":`, 1), 200, `"line_id":"student_line"`},
+		{"phone preserves leading zero", "POST", "/api/v1/register", valid, 200, `"phone":"0812345678"`},
+		{"missing phone", "POST", "/api/v1/register", strings.Replace(valid, `,"phone":"0812345678"`, "", 1), 400, `"phone":"กรุณากรอกหมายเลขโทรศัพท์เป็นตัวเลขเท่านั้น"`},
+		{"invalid phone", "POST", "/api/v1/register", strings.Replace(valid, "0812345678", "081abc5678", 1), 400, `"phone":`},
+		{"decimal phone", "POST", "/api/v1/register", strings.Replace(valid, "0812345678", "081.2345678", 1), 400, `"phone":`},
+		{"signed phone", "POST", "/api/v1/register", strings.Replace(valid, "0812345678", "-0812345678", 1), 400, `"phone":`},
+		{"missing business type", "POST", "/api/v1/register", strings.Replace(valid, `,"business_type":"ร้านค้าออนไลน์"`, "", 1), 400, `"business_type":"กรุณาเลือกประเภทธุรกิจ"`},
+		{"missing website name", "POST", "/api/v1/register", strings.Replace(valid, `,"website_name":"student-shop"`, "", 1), 400, `"website_name":`},
+		{"short website name", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "a", 1), 400, `"website_name":`},
+		{"minimum website name", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "a1", 1), 200, `"website_name":"a1"`},
+		{"maximum website name", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", strings.Repeat("a", 30), 1), 200, "ข้อมูลสมัครสมาชิกถูกต้อง"},
+		{"long website name", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", strings.Repeat("a", 31), 1), 400, `"website_name":`},
+		{"uppercase website name", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "Student", 1), 400, `"website_name":`},
+		{"website leading hyphen", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "-student", 1), 400, `"website_name":`},
+		{"website trailing hyphen", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "student-", 1), 400, `"website_name":`},
+		{"website underscore", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "student_shop", 1), 400, `"website_name":`},
+		{"website thai characters", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "ร้านค้า", 1), 400, `"website_name":`},
+		{"website full domain", "POST", "/api/v1/register", strings.Replace(valid, "student-shop", "student.sogoodweb.com", 1), 400, `"website_name":`},
 	}
 
 	for _, tt := range tests {

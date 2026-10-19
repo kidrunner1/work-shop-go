@@ -33,13 +33,21 @@ func Register(ctx *fiber.Ctx) error {
 		for _, fieldError := range fieldErrors {
 			switch fieldError.StructField() {
 			case "Username":
-				details["username"] = "กรุณากรอกชื่อผู้ใช้ 3–20 ตัว โดยใช้ตัวอักษรภาษาอังกฤษหรือตัวเลขเท่านั้น"
+				details["username"] = "กรุณากรอกชื่อผู้ใช้ 3–20 ตัว โดยใช้ตัวอักษรภาษาอังกฤษ (a-z),(A-Z) หรือตัวเลขเท่านั้น"
 			case "Email":
 				details["email"] = "กรุณากรอกอีเมลให้ถูกต้อง เช่น student@example.com และยาวไม่เกิน 254 ตัวอักษร"
 			case "Password":
-				details["password"] = "กรุณากรอกรหัสผ่าน 8–72 ตัวอักษร"
+				details["password"] = "กรุณากรอกรหัสผ่าน 6-20 ตัวขึ้นไป"
 			case "ConfirmPassword":
 				details["confirm_password"] = "กรุณากรอกยืนยันรหัสผ่านให้ตรงกับรหัสผ่าน"
+			// case "LineID":
+			// 	details["line_id"] = "กรุณากรอกไอดีไลน์" กรณีอยาก ตรวจสอบ LINE ID
+			case "Phone":
+				details["phone"] = "กรุณากรอกหมายเลขโทรศัพท์เป็นตัวเลขเท่านั้น"
+			case "BusinessType":
+				details["business_type"] = "กรุณาเลือกประเภทธุรกิจ"
+			case "WebsiteName":
+				details["website_name"] = "กรุณากรอกชื่อเว็บไซต์ 2–30 ตัว ใช้ภาษาอังกฤษตัวพิมพ์เล็ก ตัวเลข หรือขีดกลาง (-) โดยห้ามขึ้นต้นหรือลงท้ายด้วยขีดกลาง และไม่ต้องใส่ .sogoodweb.com"
 			}
 		}
 
@@ -50,12 +58,16 @@ func Register(ctx *fiber.Ctx) error {
 	}
 
 	// 3. ตัวอย่างนี้ตรวจสอบข้อมูลเท่านั้น ยังไม่ได้บันทึกลงฐานข้อมูล
-	// ส่งกลับเฉพาะ username และ email ไม่ส่งรหัสผ่านกลับ
+	// ส่งกลับข้อมูลสมัครสมาชิก ไม่ส่งรหัสผ่านและยืนยันรหัสผ่านกลับ
 	return ctx.JSON(fiber.Map{
 		"message": "ข้อมูลสมัครสมาชิกถูกต้อง",
 		"data": fiber.Map{
-			"username": input.Username,
-			"email":    input.Email,
+			"username":      input.Username,
+			"email":         input.Email,
+			"line_id":       input.LineID,
+			"phone":         input.Phone,
+			"business_type": input.BusinessType,
+			"website_name":  input.WebsiteName,
 		},
 	})
 }

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	c "workshop-go/controller" // ตั้งชื่อย่อ controller เป็น c
+	g "workshop-go/controller" // ตั้งชื่อย่อ controller เป็น c
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
@@ -26,9 +26,9 @@ func Setup(app *fiber.App) {
 	}))
 
 	v1 := app.Group("/api/v1")
-	v1.Get("/fact/:number", c.Factorial)
-	v1.Post("/register", c.Register)
+	v1.Get("/fact/:number", g.Factorial)
+	v1.Post("/register", g.Register)
 
 	v3 := app.Group("/api/v3")
-	v3.Get("/krit", c.TestParams) // เปลี่ยน krit เป็นชื่อเล่นของตัวเอง
+	v3.Get("/krit", g.TestParams) // เปลี่ยน krit เป็นชื่อเล่นของตัวเอง
 }

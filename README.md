@@ -75,7 +75,7 @@ import c "workshop-go/controller"
 
 ## ข้อ 6 สมัครสมาชิกด้วย validator
 
-โจทย์ไม่ได้ระบุฟิลด์ จึงใช้ 4 ฟิลด์ต่อไปนี้เป็นตัวอย่าง และเน้นขั้นตอนรับ/ตรวจสอบข้อมูล ยังไม่มีฐานข้อมูลหรือการบันทึกสมาชิก
+เพิ่มฟิลด์ที่ขาดจากภาพ ได้แก่ LINE ID, หมายเลขโทรศัพท์, ประเภทธุรกิจ และชื่อเว็บไซต์ โดยคงฟิลด์และกฎเดิมไว้ ตัวอย่างนี้เน้นขั้นตอนรับ/ตรวจสอบข้อมูล ยังไม่มีฐานข้อมูลหรือการบันทึกสมาชิก
 
 | ฟิลด์ | กฎ |
 | --- | --- |
@@ -83,6 +83,12 @@ import c "workshop-go/controller"
 | email | จำเป็น, รูปแบบอีเมลถูกต้อง, ไม่เกิน 254 ตัวอักษร |
 | password | จำเป็น, 8–72 ตัวอักษร |
 | confirm_password | จำเป็น, ตรงกับ password |
+| line_id | ไม่บังคับกรอก |
+| phone | จำเป็น, ตัวเลข 0–9 เท่านั้น ส่งเป็นข้อความเพื่อเก็บเลข 0 ด้านหน้า |
+| business_type | จำเป็น, ส่งประเภทธุรกิจที่เลือกเป็นข้อความ |
+| website_name | จำเป็น, 2–30 ตัว, ภาษาอังกฤษตัวพิมพ์เล็ก ตัวเลข หรือขีดกลาง (-), ห้ามขึ้นต้นหรือลงท้ายด้วยขีดกลาง |
+
+`website_name` รับเฉพาะชื่อหน้า `.sogoodweb.com` เช่น `student-shop` ไม่รับ URL หรือชื่อโดเมนเต็ม ส่วนภาพไม่ได้แสดงรายการประเภทธุรกิจ จึงยังไม่กำหนดรายการค่าที่อนุญาตสำหรับ `business_type`
 
 ส่ง `POST http://localhost:3000/api/v1/register` พร้อม Basic Auth ตามด้านบน ตั้ง `Content-Type: application/json` และส่ง body ดังนี้:
 
@@ -91,7 +97,11 @@ import c "workshop-go/controller"
   "username": "student01",
   "email": "student@example.com",
   "password": "password123",
-  "confirm_password": "password123"
+  "confirm_password": "password123",
+  "line_id": "student_line",
+  "phone": "0812345678",
+  "business_type": "ร้านค้าออนไลน์",
+  "website_name": "student-shop"
 }
 ```
 
@@ -102,7 +112,11 @@ import c "workshop-go/controller"
   "message": "ข้อมูลสมัครสมาชิกถูกต้อง",
   "data": {
     "username": "student01",
-    "email": "student@example.com"
+    "email": "student@example.com",
+    "line_id": "student_line",
+    "phone": "0812345678",
+    "business_type": "ร้านค้าออนไลน์",
+    "website_name": "student-shop"
   }
 }
 ```
